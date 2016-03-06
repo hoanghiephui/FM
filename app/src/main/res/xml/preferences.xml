@@ -1,0 +1,180 @@
+<!--
+    Copyright (C) 2014 Arpit Khurana <arpitkh96@gmail.com>, Vishal Nehra <vishalmeham2@gmail.com>
+
+    This file is part of Amaze File Manager.
+
+    Amaze File Manager is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.jenzz.materialpreference.PreferenceCategory android:title="@string/ui">
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_style_grey_600_24dp"
+            android:key="theme"
+            android:summary="@string/darkThemeDes"
+            android:title="@string/theme" />
+
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_color_lens_grey_600_24dp"
+            android:key="skin"
+            android:summary="@string/primary_color_summary"
+            android:title="@string/primary_color_title" />
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_color_lens_grey_600_24dp"
+            android:key="fab_skin"
+            android:summary="@string/accent_color_summary"
+            android:title="@string/accent_color_title" />
+
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:icon="@drawable/ic_color_lens_grey_600_24dp"
+            android:key="colorednavigation"
+            android:summary="@string/colourednavigationsum"
+            android:title="@string/colourednavigation" />
+
+        <com.jenzz.materialpreference.SwitchPreference
+            android:icon="@drawable/ic_shuffle_grey_600_24dp"
+            android:key="random_checkbox"
+            android:summary="@string/random_summary"
+            android:title="@string/random" />
+
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_invert_colors_off_grey_600_24dp"
+            android:key="coloriseIcons"
+            android:summary="@string/colorize_summary"
+            android:title="@string/colorize" />
+
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_invert_colors_grey_600_24dp"
+            android:key="icon_skin"
+            android:summary="@string/icon_color_summary"
+            android:title="@string/icon_color_title" />
+
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_adjust_grey_600_24dp"
+            android:key="circularimages"
+            android:summary="@string/circularimages"
+            android:title="@string/circularicons" />
+
+
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_view_headline_grey_600_24dp"
+            android:key="showDividers"
+            android:title="@string/showDividers" />
+
+    </com.jenzz.materialpreference.PreferenceCategory>
+
+    <com.jenzz.materialpreference.PreferenceCategory android:title="@string/general">
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_subject_grey_600_24dp"
+            android:key="savepaths"
+            android:summary="@string/savepathsummary"
+            android:title="@string/savepaths" />
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_landscape_grey_600_24dp"
+            android:key="showThumbs"
+            android:summary="@string/thumbSummary"
+            android:title="@string/thumb" />
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_visibility_grey_600_24dp"
+            android:key="showHidden"
+            android:title="@string/hidden" />
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:enabled="false"
+            android:icon="@drawable/ic_access_time_grey_600_24dp"
+            android:key="showLastModified"
+            android:summary="@string/lastModifiedSummary"
+            android:title="@string/lastModifiedPref" />
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_transform_grey_600_24dp"
+            android:key="showFileSize"
+            android:summary="@string/sizePrefSummary"
+            android:title="@string/sizePref" />
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_arrow_back_grey_600_24dp"
+            android:key="goBack_checkbox"
+            android:summary="@string/back_summary"
+            android:title="@string/back_title" />
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_view_module_grey_600_24dp"
+            android:key="columns"
+            android:title="@string/gridcolumnno"
+            android:summary="@string/desColumn" />
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_sort_grey_600_24dp"
+            android:key="dirontop"
+            android:title="@string/directorysort"
+            android:summary="@string/desData" />
+
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_filter_list_grey_600_24dp"
+            android:key="sortby"
+            android:title="@string/sortby"
+            android:summary="@string/desSort" />
+
+    </com.jenzz.materialpreference.PreferenceCategory>
+
+
+    <com.jenzz.materialpreference.PreferenceCategory android:title="@string/archive_preferences">
+        <com.jenzz.materialpreference.Preference
+            android:key="extractpath"
+            android:icon="@drawable/ic_vertical_align_center_grey_600_24dp"
+            android:title="@string/archive_extract_folder"
+            android:summary="@string/archive_summary"></com.jenzz.materialpreference.Preference>
+        <com.jenzz.materialpreference.Preference
+            android:key="zippath"
+            android:icon="@drawable/ic_settings_ethernet_grey_600_24dp"
+            android:summary="@string/zip_summary"
+            android:title="@string/zip_create_folder"></com.jenzz.materialpreference.Preference>
+    </com.jenzz.materialpreference.PreferenceCategory>
+    <com.jenzz.materialpreference.PreferenceCategory android:title="@string/miscellaneous">
+
+        <com.jenzz.materialpreference.SwitchPreference
+            android:icon="@drawable/ic_memory_grey_600_24dp"
+            android:defaultValue="false"
+            android:key="showPermissions"
+            android:summary="@string/rootPrefSummary"
+            android:title="@string/rootPref" />
+        <com.jenzz.materialpreference.SwitchPreference
+            android:icon="@drawable/ic_security_grey_600_24dp"
+            android:defaultValue="false"
+            android:key="rootmode"
+            android:summary="@string/rootmodesummary"
+            android:title="@string/rootmode" />
+    </com.jenzz.materialpreference.PreferenceCategory>
+
+    <com.jenzz.materialpreference.PreferenceCategory android:title="@string/about">
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_star_grey_600_24dp"
+            android:key="rate"
+            android:title="@string/rate" />
+        <!--<com.jenzz.materialpreference.Preference
+            android:key="donate"
+            android:title="@string/donate" />-->
+        <com.jenzz.materialpreference.Preference
+            android:icon="@drawable/ic_feedback_grey_600_24dp"
+            android:key="feedback"
+            android:title="@string/feedback" />
+    </com.jenzz.materialpreference.PreferenceCategory>
+</PreferenceScreen>
