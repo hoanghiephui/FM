@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2016. by Hoang Hiep (hoanghiep8899@gmail.com)
  * This file Preferences.java is part of File Manager
- * Create at 3/6/16 2:19 PM
+ * Create at 3/6/16 9:31 PM
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -40,7 +40,6 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.folderselector.FolderChooserDialog;
 import com.filemanager.free.BuildConfig;
 import com.filemanager.free.R;
-import com.filemanager.free.fragments.preference_fragments.ColorPref;
 import com.filemanager.free.fragments.preference_fragments.Preffrag;
 import com.filemanager.free.utils.PreferenceUtils;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
@@ -196,13 +195,7 @@ public class Preferences extends BaseActivity implements
                 assert (getSupportActionBar()) != null;
                 getSupportActionBar().setTitle(R.string.setting);
                 break;
-            case 1:
-                FragmentTransaction transaction1 = getFragmentManager().beginTransaction();
-                transaction1.replace(R.id.prefsfragment, new ColorPref());
-                transaction1.commit();
-                select = 1;
-                assert (getSupportActionBar()) != null;
-                getSupportActionBar().setTitle(R.string.color_title);
+            default:
                 break;
         }
     }

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2016. by Hoang Hiep (hoanghiep8899@gmail.com)
  * This file MainActivity.java is part of File Manager
- * Create at 3/6/16 2:19 PM
+ * Create at 3/6/16 9:31 PM
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -1168,7 +1168,7 @@ public class MainActivity extends BaseActivity implements
         if (mAdView != null) {
             mAdView.resume();
         }
-
+        requestNewInterstitial();
         if (materialDialog != null && !materialDialog.isShowing()) {
             materialDialog.show();
             materialDialog = null;
@@ -1974,7 +1974,6 @@ public class MainActivity extends BaseActivity implements
             @Override
             public void onClick(View view) {
                 setResult(0, true);
-                ;
             }
         });
         //menu thêm file
@@ -2058,7 +2057,6 @@ public class MainActivity extends BaseActivity implements
                 } else {
                     mainActivityHelper.add(num);
                 }
-                requestNewInterstitial();
             }
         });
         if (mInterstitialAd != null && !mInterstitialAd.isLoaded()) {
