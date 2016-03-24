@@ -78,7 +78,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:visibility="gone"></LinearLayout>
+                        android:visibility="gone">
+
+                    </LinearLayout>
                 </HorizontalScrollView>
 
                 <LinearLayout
@@ -161,13 +163,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:gravity="bottom"
-                android:weightSum="1">
+                android:gravity="bottom">
 
                 <com.github.clans.fab.FloatingActionMenu
+                    android:layout_weight="1"
                     android:id="@+id/menu"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_gravity="bottom|right"
                     android:layout_marginBottom="2dp"
                     android:layout_marginLeft="10dp"
@@ -241,14 +243,15 @@
                         fab:fab_size="mini" />
                 </com.github.clans.fab.FloatingActionMenu>
 
-                <com.google.android.gms.ads.AdView
-                    android:id="@+id/adView"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/ads"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    ads:adSize="SMART_BANNER"
-                    android:visibility="gone"
-                    ads:adUnitId="ca-app-pub-2257698129050878/2836408344" />
+                    android:gravity="center_horizontal|top"
+                    android:visibility="visible">
+
+                    <include layout="@layout/ads_layout" />
+                </LinearLayout>
             </LinearLayout>
         </FrameLayout>
 
@@ -271,14 +274,6 @@
         android:layout_width="@dimen/drawer_width"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
-        <!--
-            android:layout_gravity="start" tells DrawerLayout to treat
-            this as a sliding drawer on the left side for left-to-right
-            languages and on the right side for right-to-left languages.
-            The drawer is given a fixed width in dp and extends the full height of
-            the container. A solid background is used for contrast
-            with the content view.
-       -->
         <com.filemanager.free.ui.views.ScrimInsetsRelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/left_drawer"
             android:layout_width="@dimen/drawer_width"
@@ -308,7 +303,7 @@
                 android:background="@android:color/transparent"
                 android:paddingBottom="8dp"
                 android:paddingTop="0dp"
-                android:src="@color/divider"></ImageView>
+                android:src="@color/divider"/>
 
             <RelativeLayout
                 android:id="@+id/appbutton"
@@ -345,7 +340,6 @@
                     android:layout_toRightOf="@+id/appicon"
                     android:clickable="false"
                     android:ellipsize="end"
-                    android:fontFamily="sans-serif-medium"
                     android:gravity="center_vertical"
                     android:singleLine="true"
                     android:text="@string/apps"
@@ -388,7 +382,6 @@
                     android:layout_toRightOf="@+id/settingicon"
                     android:clickable="false"
                     android:ellipsize="end"
-                    android:fontFamily="sans-serif-medium"
                     android:gravity="center_vertical"
                     android:singleLine="true"
                     android:text="@string/setting"
@@ -399,18 +392,3 @@
         </com.filemanager.free.ui.views.ScrimInsetsRelativeLayout>
     </android.support.v4.widget.DrawerLayout>
 </FrameLayout>
-
-    <!--
-    <ListView
-        android:id="@+id/right_drawer"
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="right"
-        android:choiceMode="singleChoice"
-		android:background="@drawable/drawer_bg"
-        android:dividerHeight="0dip"
-
-		style="@android:style/Theme.Holo.Light"
-	/>
-    -->
-

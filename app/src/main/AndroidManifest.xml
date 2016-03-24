@@ -28,6 +28,7 @@
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
+        android:name=".apps.FileApplications"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         tools:replace="android:label"
@@ -102,6 +103,8 @@
                 <data android:mimeType="db/*" />
             </intent-filter>
         </activity>
+
+
 
         <!--Include the AdActivity configChanges and theme. -->
         <activity

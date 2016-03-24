@@ -54,7 +54,7 @@ import java.util.List;
 public class AppsAdapter extends ArrayAdapter<Layoutelements> {
     Context context;
     List<Layoutelements> items;
-    public HashMap<Integer, Boolean> myChecked = new HashMap<Integer, Boolean>();
+    public HashMap<Integer, Boolean> myChecked = new HashMap<>();
     AppsList app;
     ArrayList<PackageInfo> c = new ArrayList<PackageInfo>();
 
@@ -285,10 +285,14 @@ public class AppsAdapter extends ArrayAdapter<Layoutelements> {
                                 File f = new File(rowItem.getDesc());
                                 ArrayList<BaseFile> ab = new ArrayList<>();
                                 File dst = new File(Environment.getExternalStorageDirectory().getPath() + "/app_backup");
-                                if (!dst.exists() || !dst.isDirectory()) dst.mkdirs();
+                                if (!dst.exists() || !dst.isDirectory()){
+                                    dst.mkdirs();
+                                }
                                 Intent intent = new Intent(app.getActivity(), CopyService.class);
                                 BaseFile baseFile = RootHelper.generateBaseFile(f, true);
-                                baseFile.setName(rowItem.getTitle() + "_" + rowItem.getSymlink() + ".apk");
+                                if (baseFile != null) {
+                                    baseFile.setName(rowItem.getTitle() + "_" + rowItem.getSymlink() + ".apk");
+                                }
                                 ab.add(baseFile);
                                 intent.putExtra("FILE_PATHS", ab);
                                 intent.putExtra("COPY_DIRECTORY", dst.getPath());

@@ -409,5 +409,13 @@
     <string name="wallet_version_dialog_button_market">Google Play</string>
     <string name="button_dismiss">Dismiss</string>
     <string name="wallet_version_dialog_msg_deprecated">If you don\'t see an update, this probably means your version of Android isn\'t supported any more.</string>
+    <string name="setPin">Password protection</string>
+    <string name="setPinDes">Set the pin code to protect your data</string>
+
+    <string name="activity_dialog_title">Forgot you Pincode?</string>
+    <string name="activity_dialog_accept">OK</string>
+    <string name="activity_dialog_decline" tools:ignore="ButtonCase">CANCEL</string>
+    <string name="activity_dialog_content">Tap \'OK\' to log out, when you log back in you\'ll be able to create a new Pincode.\n\nIf you remember your Pincode, tap \'Cancel\' to go back.</string>
+    <string name="invalid_name">Invalid name, please try again</string>
 </resources>
 

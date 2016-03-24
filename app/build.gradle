@@ -20,8 +20,8 @@ android {
         applicationId "com.filemanager.free"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 7
-        versionName "2.2"
+        versionCode 8
+        versionName "2.3"
     }
     buildTypes {
         release {
@@ -50,16 +50,12 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:design:23.2.0'
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:cardview-v7:23.2.0'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:cardview-v7:23.2.1'
     compile 'com.google.android.gms:play-services-plus:8.4.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.4'
-    //Lollipin
-    compile 'com.github.orangegangsters:lollipin:1.7.0@aar'
-    compile 'com.github.omadahealth.typefaceview:typefaceview:1.3.0@aar'
-    compile 'com.github.traex.rippleeffect:library:1.3'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
     compile 'com.github.junrar:junrar:0.7'
     compile 'org.apache.commons:commons-compress:1.10'
@@ -69,14 +65,15 @@ dependencies {
         transitive = true
     }
     compile 'com.lapism:searchview:2.2'
-    compile 'com.android.support:percent:23.2.0'
-    compile 'com.android.support:support-annotations:23.2.0'
+    compile 'com.android.support:percent:23.2.1'
+    compile 'com.android.support:support-annotations:23.2.1'
     compile 'com.turingtechnologies.materialscrollbar:lib:8.+'
     compile 'com.jenzz:materialpreference:1.3'
     compile 'com.google.android.gms:play-services-ads:8.4.0'
-    compile project(':JCIFS-1.3.18SMB-Network')
+    //compile project(':jcifs-1.3.18')
     compile project(':RootTools')
     compile project(':StickyHeadersRecyclerView')
+    compile 'uk.me.lewisdeane.ldialogs:ldialogs:1.2.0@aar'
 }
 configurations {
     all*.exclude module: 'classworlds'

@@ -88,7 +88,7 @@ public class TextReader extends BaseActivity
     /*
     List maintaining the searched text's start/end index as key/value pair
      */
-    public ArrayList<MapEntry> nodes;
+    public ArrayList<MapEntry> nodes = new ArrayList<>();
 
     /*
     variable to maintain the position of index
@@ -103,6 +103,9 @@ public class TextReader extends BaseActivity
     public int mLine = 0;
 
     private SearchTextTask searchTextTask;
+    private static final String KEY_MODIFIED_TEXT = "modified";
+    private static final String KEY_INDEX = "index";
+    private static final String KEY_ORIGINAL_TEXT = "original";
 
     Uri uri = null;
     public ImageButton upButton, downButton, closeButton;
@@ -194,7 +197,14 @@ public class TextReader extends BaseActivity
         } catch (Exception ignored) {
 
         }
-        load(mFile);
+        if (savedInstanceState!=null) {
+            mOriginal = savedInstanceState.getString(KEY_ORIGINAL_TEXT);
+            int index = savedInstanceState.getInt(KEY_INDEX);
+            mInput.setText(savedInstanceState.getString(KEY_MODIFIED_TEXT));
+            mInput.setScrollY(index);
+        } else {
+            load(mFile);
+        }
     }
 
     @Override
@@ -206,6 +216,13 @@ public class TextReader extends BaseActivity
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_MODIFIED_TEXT, mInput.getText().toString());
+        outState.putInt(KEY_INDEX, mInput.getScrollY());
+        outState.putString(KEY_ORIGINAL_TEXT, mOriginal);
+    }
 
     public void onDestroyActionMode() {
 

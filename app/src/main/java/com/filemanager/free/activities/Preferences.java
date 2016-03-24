@@ -55,6 +55,7 @@ public class Preferences extends BaseActivity implements
     public int changed = 0;
     private final static int STORAGE_PERMISSION_RC = 69;
     private Handler mHandler;
+    public static final int REQUEST_CODE_ENABLE = 11;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -121,6 +122,7 @@ public class Preferences extends BaseActivity implements
             activity.overridePendingTransition(enter_anim, exit_anim);
             activity.startActivity(in);
         }
+        MainActivity.showInterstitial();
     }
 
     @Override
@@ -143,6 +145,7 @@ public class Preferences extends BaseActivity implements
                     activity.overridePendingTransition(enter_anim, exit_anim);
                     activity.startActivity(in);
                 }
+                MainActivity.showInterstitial();
                 return true;
 
         }
@@ -228,6 +231,20 @@ public class Preferences extends BaseActivity implements
             } else {
                 Toast.makeText(this, "The folder or file chooser will not work without permission to read external storage.", Toast.LENGTH_LONG).show();
             }
+        }
+    }
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode){
+            case REQUEST_CODE_ENABLE:
+                Toast.makeText(this, "PinCode enabled", Toast.LENGTH_SHORT).show();
+                //p.getResultPin(REQUEST_CODE_ENABLE);
+                break;
         }
     }
 

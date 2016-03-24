@@ -21,4 +21,9 @@
     <dimen name="spacing_normal">8dp</dimen>
     <dimen name="spacing_micro">4dp</dimen>
     <dimen name="keyline_1">16dp</dimen>
+
+    <dimen name="activity_dialog_title_size">9sp</dimen>
+    <dimen name="activity_dialog_content_size">5sp</dimen>
+    <dimen name="activity_dialog_positive_button_size">6sp</dimen>
+    <dimen name="activity_dialog_negative_button_size">6sp</dimen>
 </resources>

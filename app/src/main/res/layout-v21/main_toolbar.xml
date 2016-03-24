@@ -160,13 +160,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:gravity="bottom"
-                android:weightSum="1">
+                android:gravity="bottom">
 
                 <com.github.clans.fab.FloatingActionMenu
+                    android:layout_weight="1"
                     android:id="@+id/menu"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_gravity="bottom|right"
                     android:layout_marginBottom="2dp"
                     android:layout_marginLeft="10dp"
@@ -240,14 +240,15 @@
 
                 </com.github.clans.fab.FloatingActionMenu>
 
-                <com.google.android.gms.ads.AdView
-                    android:id="@+id/adView"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/ads"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    ads:adSize="SMART_BANNER"
-                    android:visibility="gone"
-                    ads:adUnitId="ca-app-pub-2257698129050878/2836408344" />
+                    android:gravity="center_horizontal|top"
+                    android:visibility="visible">
+
+                    <include layout="@layout/ads_layout" />
+                </LinearLayout>
             </LinearLayout>
         </FrameLayout>
 

@@ -12,6 +12,7 @@
 
 package com.filemanager.free.utils;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,6 +21,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +38,7 @@ import com.filemanager.free.filesystem.BaseFile;
 import com.filemanager.free.filesystem.FileUtil;
 import com.filemanager.free.filesystem.HFile;
 import com.filemanager.free.filesystem.Operations;
-import com.filemanager.free.fragments.AsyncHelper;
+import com.filemanager.free.fragments.SearchAsyncHelper;
 import com.filemanager.free.fragments.Main;
 import com.filemanager.free.fragments.TabFragment;
 import com.filemanager.free.services.DeleteTask;
@@ -53,6 +55,17 @@ import java.util.ArrayList;
 public class MainActivityHelper {
     MainActivity mainActivity;
     Futils utils;
+    public static String SEARCH_TEXT;
+
+    // reserved characters by OS, shall not be allowed in file names
+    private static final String CONSTANT_FOREWARD_SLASH = "/";
+    private static final String CONSTANT_BACKWARD_SLASH = "\\";
+    private static final String CONSTANT_COLON = ":";
+    private static final String CONSTANT_ASTERISK = "*";
+    private static final String CONSTANT_QUESTION_MARK = "?";
+    private static final String CONSTANT_QUOTE = "\"";
+    private static final String CONSTANT_GREATER_THAN = ">";
+    private static final String CONSTANT_LESS_THAN = "<";
 
     public MainActivityHelper(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -89,7 +102,6 @@ public class MainActivityHelper {
                         mainActivity.refreshDrawer();
                     }
                 } else if (intent.getAction().equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
-
                     mainActivity.refreshDrawer();
                 }
             }
@@ -101,8 +113,12 @@ public class MainActivityHelper {
         materialDialog.getActionButton(DialogAction.POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String a = materialDialog.getInputEditText().getText().toString();
-                mkDir(new HFile(openMode, path + "/" + a), ma);
+                if (validateFileName(new HFile(openMode, path + "/" + a), true)) {
+                    mkDir(new HFile(openMode, path + "/" + a), ma);
+                } else
+                    Toast.makeText(mainActivity, R.string.invalid_name, Toast.LENGTH_SHORT).show();
                 materialDialog.dismiss();
             }
         });
@@ -115,7 +131,10 @@ public class MainActivityHelper {
             @Override
             public void onClick(View v) {
                 String a = materialDialog.getInputEditText().getText().toString();
-                mkFile(new HFile(openMode, path + "/" + a), ma);
+                if (validateFileName(new HFile(openMode, path + "/" + a), false)) {
+                    mkFile(new HFile(openMode, path + "/" + a), ma);
+                } else
+                    Toast.makeText(mainActivity, R.string.invalid_name, Toast.LENGTH_SHORT).show();
                 materialDialog.dismiss();
             }
         });
@@ -206,6 +225,7 @@ public class MainActivityHelper {
         y.show();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void triggerStorageAccessFramework() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         mainActivity.startActivityForResult(intent, 3);
@@ -449,22 +469,21 @@ public class MainActivityHelper {
         if (input.length() == 0) {
             return;
         }
-                /*SearchTask task = new SearchTask(ma.searchHelper, ma, a);
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, fpath);*/
-        //ma.searchTask = task;
+        SEARCH_TEXT = input;
         mainActivity.mainFragment = (Main) mainActivity.getFragment().getTab();
         FragmentManager fm = mainActivity.getSupportFragmentManager();
-        mainActivity.mAsyncHelperFragment = new AsyncHelper();
+        SearchAsyncHelper fragment = (SearchAsyncHelper) fm.findFragmentByTag(MainActivity.TAG_ASYNC_HELPER);
 
-        Bundle args = new Bundle();
-        args.putString("input", input);
-        args.putString("path", fpath);
-        args.putInt("open_mode", ma.openMode);
-        args.putBoolean("root_mode", ma.ROOT_MODE);
+        if (fragment != null) {
 
-        mainActivity.mAsyncHelperFragment.setArguments(args);
-        fm.beginTransaction().add(mainActivity.mAsyncHelperFragment,
-                mainActivity.TAG_ASYNC_HELPER).commit();
+            if (fragment.mSearchTask.getStatus() == AsyncTask.Status.RUNNING) {
+
+                fragment.mSearchTask.cancel(true);
+            }
+            fm.beginTransaction().remove(fragment).commit();
+        }
+
+        addSearchFragment(fm, new SearchAsyncHelper(), fpath, input, ma.openMode, ma.ROOT_MODE);
         /*final MaterialDialog.Builder a = new MaterialDialog.Builder( mainActivity);
         a.title(R.string.search);
         a.input(utils.getString(mainActivity, R.string.enterfile), "", true, new MaterialDialog
@@ -493,4 +512,45 @@ public class MainActivityHelper {
         b.show();*/
     }
 
+
+    public static void addSearchFragment(FragmentManager fragmentManager, Fragment fragment,
+                                         String path, String input, int openMode, boolean rootMode) {
+        Bundle args = new Bundle();
+        args.putString("input", input);
+        args.putString("path", path);
+        args.putInt("open_mode", openMode);
+        args.putBoolean("root_mode", rootMode);
+
+        fragment.setArguments(args);
+        fragmentManager.beginTransaction().add(fragment,
+                MainActivity.TAG_ASYNC_HELPER).commit();
+    }
+
+    /*
+     * Validates file name at the time of creation
+     * special reserved characters shall not be allowed in the file names
+     * @param file the file which needs to be validated
+     * @param isDir if the file is a directory, in case it shall not be named same as the parent
+     * @return boolean if the file name is valid or invalid
+     */
+    public static boolean validateFileName(HFile file, boolean isDir) {
+
+        StringBuilder builder = new StringBuilder(file.getPath());
+        String newName = builder.substring(builder.lastIndexOf("/") + 1, builder.length());
+
+        if (newName.contains(CONSTANT_ASTERISK) || newName.contains(CONSTANT_BACKWARD_SLASH) ||
+                newName.contains(CONSTANT_COLON) || newName.contains(CONSTANT_FOREWARD_SLASH) ||
+                newName.contains(CONSTANT_GREATER_THAN) || newName.contains(CONSTANT_LESS_THAN) ||
+                newName.contains(CONSTANT_QUESTION_MARK) || newName.contains(CONSTANT_QUOTE)) {
+            return false;
+        } else if (isDir) {
+            // new directory name shall not be equal to parent directory name
+            StringBuilder parentPath = new StringBuilder(builder.substring(0,
+                    builder.length() - (newName.length() + 1)));
+            String parentName = parentPath.substring(parentPath.lastIndexOf("/") + 1,
+                    parentPath.length());
+            if (newName.equals(parentName)) return false;
+        }
+        return true;
+    }
 }

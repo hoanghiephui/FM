@@ -39,12 +39,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -69,6 +72,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.filemanager.free.IMyAidlInterface;
@@ -88,10 +92,10 @@ import com.filemanager.free.ui.icons.IconUtils;
 import com.filemanager.free.ui.icons.Icons;
 import com.filemanager.free.ui.icons.MimeTypes;
 import com.filemanager.free.ui.views.DividerItemDecoration;
-import com.filemanager.free.ui.views.FastScroller;
 import com.filemanager.free.utils.DataUtils;
 import com.filemanager.free.utils.FileListSorter;
 import com.filemanager.free.utils.Futils;
+import com.filemanager.free.utils.MainActivityHelper;
 import com.filemanager.free.utils.PreferenceUtils;
 import com.filemanager.free.utils.SmbStreamer.Streamer;
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration;
@@ -159,6 +163,7 @@ public class Main extends Fragment {
     Streamer s;
     private View rootView;
     private View actionModeView;
+    private boolean mRetainSearchTask = false;
     //private FastScroller fastScroller;
 
     public Main() {
@@ -231,29 +236,7 @@ public class Main extends Fragment {
             }
         });
 
-        //kiểm tra recyclerView khi cuộn thì ẩn nút floating và nếu là hiển thị dạng ô thì ẩn quảng cáo
-        listView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                LinearLayoutManager llm = (LinearLayoutManager) listView.getLayoutManager();
-                displayedposition = llm.findFirstVisibleItemPosition();
-                if (displayedposition > 2) {
-                    MAIN_ACTIVITY.floatingActionButton.hideMenuButton(true);
-                    if (!IS_LIST) {
-                        MAIN_ACTIVITY.mAdView.setVisibility(View.INVISIBLE);
-                    }
-                } else {
-                    MAIN_ACTIVITY.floatingActionButton.showMenuButton(true);
-                    MAIN_ACTIVITY.mAdView.setVisibility(View.VISIBLE);
-                }
-            }
-        });
+        setHideButtonFloating(listView);
 
         mToolbarContainer.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -287,6 +270,8 @@ public class Main extends Fragment {
         //   listView.setPadding(listView.getPaddingLeft(), paddingTop, listView.getPaddingRight(), listView.getPaddingBottom());
         return rootView;
     }
+
+
 
     public int dpToPx(int dp) {
         if (displayMetrics == null) displayMetrics = getResources().getDisplayMetrics();
@@ -443,9 +428,9 @@ public class Main extends Fragment {
             folder_count = savedInstanceState.getInt("folder_count", 0);
             file_count = savedInstanceState.getInt("file_count", 0);
             results = savedInstanceState.getBoolean("results");
-            adapter = savedInstanceState.getParcelable("adapter");
+
             MAIN_ACTIVITY.updatePath(CURRENT_PATH, results, openMode, folder_count, file_count);
-            createViews(LIST_ELEMENTS, true, (CURRENT_PATH), openMode, true, !IS_LIST);
+            createViews(LIST_ELEMENTS, true, (CURRENT_PATH), openMode, results, !IS_LIST);
             if (savedInstanceState.getBoolean("selection")) {
 
                 for (int i : savedInstanceState.getIntegerArrayList("position")) {
@@ -483,7 +468,7 @@ public class Main extends Fragment {
                 outState.putIntegerArrayList("position", adapter.getCheckedItemPositions());
             }
             outState.putBoolean("results", results);
-            outState.putParcelable("adapter", adapter);
+
             if (openMode == 1) {
                 outState.putString("SmbPath", smbPath);
             }
@@ -839,11 +824,23 @@ public class Main extends Fragment {
     public void onListItemClicked(int position, View v) {
         if (position >= LIST_ELEMENTS.size()) return;
         if (results) {
-            if (MAIN_ACTIVITY.mAsyncHelperFragment != null) {
-                if (MAIN_ACTIVITY.mAsyncHelperFragment.mSearchTask.getStatus() == AsyncTask.Status.RUNNING)
-                    MAIN_ACTIVITY.mAsyncHelperFragment.mSearchTask.cancel(true);
-                MAIN_ACTIVITY.mAsyncHelperFragment = null;
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            SearchAsyncHelper fragment = (SearchAsyncHelper) fragmentManager
+                    .findFragmentByTag(MainActivity.TAG_ASYNC_HELPER);
+            if (fragment != null) {
+
+                if (fragment.mSearchTask.getStatus() == AsyncTask.Status.RUNNING) {
+
+                    fragment.mSearchTask.cancel(true);
+                }
+                getActivity().getSupportFragmentManager().beginTransaction().remove(fragment).commit();
             }
+
+            mRetainSearchTask = true;
+            results = false;
+        } else {
+            mRetainSearchTask = false;
+            MainActivityHelper.SEARCH_TEXT = null;
         }
         if (selection == true) {
             if (!LIST_ELEMENTS.get(position).getSize().equals(goback)) {
@@ -1081,25 +1078,28 @@ public class Main extends Fragment {
         });
         if (theme1 == 1) a.theme(Theme.DARK);
         a.title(utils.getString(getActivity(), R.string.rename));
-        a.callback(new MaterialDialog.ButtonCallback() {
+        a.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
-            public void onPositive(MaterialDialog materialDialog) {
-                String name = materialDialog.getInputEditText().getText().toString();
-                if (f.isSmb())
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                String name = dialog.getInputEditText().getText().toString();
+                if (f.isSmb()) {
                     if (f.isDirectory() && !name.endsWith("/"))
                         name = name + "/";
-
-                if (openMode == 1)
-                    MAIN_ACTIVITY.mainActivityHelper.rename(openMode, f.getPath(), CURRENT_PATH + name, getActivity(), ROOT_MODE);
-                else
-                    MAIN_ACTIVITY.mainActivityHelper.rename(openMode, (f).getPath(), (CURRENT_PATH + "/" + name), getActivity(), ROOT_MODE);
-
+                }
+                if (MainActivityHelper.validateFileName(new HFile(openMode, CURRENT_PATH + "/"+ name), false)){
+                    if (openMode == 1)
+                        MAIN_ACTIVITY.mainActivityHelper.rename(openMode, f.getPath(), CURRENT_PATH + name, getActivity(), ROOT_MODE);
+                    else
+                        MAIN_ACTIVITY.mainActivityHelper.rename(openMode, (f).getPath(), (CURRENT_PATH + "/" + name), getActivity(), ROOT_MODE);
+                }else {
+                    Toast.makeText(MAIN_ACTIVITY, R.string.invalid_name, Toast.LENGTH_SHORT).show();
+                }
             }
-
+        });
+        a.onNegative(new MaterialDialog.SingleButtonCallback() {
             @Override
-            public void onNegative(MaterialDialog materialDialog) {
-
-                materialDialog.cancel();
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                dialog.cancel();
             }
         });
         a.positiveText(R.string.save);
@@ -1128,7 +1128,7 @@ public class Main extends Fragment {
             return;
         }
         File f = new File(CURRENT_PATH);
-        if (!results) {
+        if (!results && !mRetainSearchTask) {
             if (selection) {
                 adapter.toggleChecked(false);
             } else {
@@ -1147,13 +1147,39 @@ public class Main extends Fragment {
                     loadlist(f.getParent(), true, openMode);
                 } else MAIN_ACTIVITY.exit();
             }
+        }else if (!results && mRetainSearchTask) {
+
+            // case when we had pressed on an item from search results and wanna go back
+            // leads to resuming the search task
+
+            if (MainActivityHelper.SEARCH_TEXT!=null) {
+
+                // starting the search query again :O
+                MAIN_ACTIVITY.mainFragment = (Main) MAIN_ACTIVITY.getFragment().getTab();
+                FragmentManager fm = MAIN_ACTIVITY.getSupportFragmentManager();
+
+                // getting parent path to resume search from there
+                String parentPath = new File(CURRENT_PATH).getParent();
+                // don't fuckin' remove this line, we need to change
+                // the path back to parent on back press
+                CURRENT_PATH = parentPath;
+
+                MainActivityHelper.addSearchFragment(fm, new SearchAsyncHelper(),
+                        parentPath, MainActivityHelper.SEARCH_TEXT, openMode, ROOT_MODE);
+            } else loadlist(CURRENT_PATH, true, -1);
+
+            mRetainSearchTask = false;
         } else {
-            if (MAIN_ACTIVITY.mAsyncHelperFragment != null) {
-                if (MAIN_ACTIVITY.mAsyncHelperFragment.mSearchTask.getStatus() == AsyncTask.Status.RUNNING)
-                    MAIN_ACTIVITY.mAsyncHelperFragment.mSearchTask.cancel(true);
-                MAIN_ACTIVITY.mAsyncHelperFragment = null;
+            // to go back after search list have been popped
+            FragmentManager fm = getActivity().getSupportFragmentManager();
+            SearchAsyncHelper fragment = (SearchAsyncHelper) fm.findFragmentByTag(MainActivity.TAG_ASYNC_HELPER);
+            if (fragment != null) {
+                if (fragment.mSearchTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    fragment.mSearchTask.cancel(true);
+                }
             }
-            loadlist(CURRENT_PATH, true, -1);
+            loadlist(new File(CURRENT_PATH).getPath(), true, -1);
+            results = false;
         }
     }
 
@@ -1378,18 +1404,22 @@ public class Main extends Fragment {
             // adding new value to LIST_ELEMENTS
             addTo(a);
             if (!results) {
-                createViews(LIST_ELEMENTS, false, (CURRENT_PATH), openMode, true, !IS_LIST);
+                createViews(LIST_ELEMENTS, false, (CURRENT_PATH), openMode, false, !IS_LIST);
                 pathname.setText(MAIN_ACTIVITY.getString(R.string.empty));
                 mFullPath.setText(MAIN_ACTIVITY.getString(R.string.searching));
+                results = true;
             } else {
                 adapter.addItem();
             }
-            results = true;
+
             stopAnimation();
         }
     }
 
     public void onSearchCompleted() {
+        if (!results){
+            LIST_ELEMENTS.clear();
+        }
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -1402,7 +1432,13 @@ public class Main extends Fragment {
                 createViews(LIST_ELEMENTS, true, (CURRENT_PATH), openMode, true, !IS_LIST);
                 pathname.setText(MAIN_ACTIVITY.getString(R.string.empty));
                 mFullPath.setText(MAIN_ACTIVITY.getString(R.string.searchresults));
-                results = true;
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainActivity.showInterstitial();
+                    }
+                },600);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -1504,6 +1540,33 @@ public class Main extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+
+    //kiểm tra recyclerView khi cuộn thì ẩn nút floating và nếu là hiển thị dạng ô thì ẩn quảng cáo
+    private void setHideButtonFloating(final RecyclerView listView) {
+        listView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager llm = (LinearLayoutManager) listView.getLayoutManager();
+                displayedposition = llm.findFirstVisibleItemPosition();
+                if (displayedposition > 0) {
+                    MAIN_ACTIVITY.floatingActionButton.hideMenuButton(true);
+                    if (!IS_LIST) {
+                        MAIN_ACTIVITY.mAdView.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    MAIN_ACTIVITY.floatingActionButton.showMenuButton(true);
+                    MAIN_ACTIVITY.mAdView.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
 }

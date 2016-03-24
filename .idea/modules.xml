@@ -3,10 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/FileManager_Update.iml" filepath="$PROJECT_DIR$/FileManager_Update.iml" />
-      <module fileurl="file://$PROJECT_DIR$/JCIFS-1.3.18SMB-Network/JCIFS-1.3.18SMB-Network.iml" filepath="$PROJECT_DIR$/JCIFS-1.3.18SMB-Network/JCIFS-1.3.18SMB-Network.iml" />
       <module fileurl="file://$PROJECT_DIR$/RootTools/RootTools.iml" filepath="$PROJECT_DIR$/RootTools/RootTools.iml" />
       <module fileurl="file://$PROJECT_DIR$/StickyHeadersRecyclerView/StickyHeadersRecyclerView.iml" filepath="$PROJECT_DIR$/StickyHeadersRecyclerView/StickyHeadersRecyclerView.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jcifs-1.3.18/jcifs-1.3.18.iml" filepath="$PROJECT_DIR$/jcifs-1.3.18/jcifs-1.3.18.iml" />
     </modules>
   </component>
 </project>

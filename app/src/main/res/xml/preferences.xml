@@ -1,21 +1,14 @@
 <!--
-    Copyright (C) 2014 Arpit Khurana <arpitkh96@gmail.com>, Vishal Nehra <vishalmeham2@gmail.com>
-
-    This file is part of Amaze File Manager.
-
-    Amaze File Manager is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    -->
+  ~ Copyright (c) 2016. by Hoang Hiep (hoanghiep8899@gmail.com)
+  ~ This file preferences.xml is part of File Manager
+  ~ Create at 3/6/16 9:33 PM
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <com.jenzz.materialpreference.PreferenceCategory android:title="@string/ui">
@@ -141,14 +134,20 @@
             android:key="extractpath"
             android:icon="@drawable/ic_vertical_align_center_grey_600_24dp"
             android:title="@string/archive_extract_folder"
-            android:summary="@string/archive_summary"></com.jenzz.materialpreference.Preference>
+            android:summary="@string/archive_summary"/>
         <com.jenzz.materialpreference.Preference
             android:key="zippath"
             android:icon="@drawable/ic_settings_ethernet_grey_600_24dp"
             android:summary="@string/zip_summary"
-            android:title="@string/zip_create_folder"></com.jenzz.materialpreference.Preference>
+            android:title="@string/zip_create_folder"/>
     </com.jenzz.materialpreference.PreferenceCategory>
     <com.jenzz.materialpreference.PreferenceCategory android:title="@string/miscellaneous">
+        <com.jenzz.materialpreference.SwitchPreference
+            android:icon="@drawable/ic_fiber_pin_grey_600_24dp"
+            android:defaultValue="false"
+            android:key="setPin"
+            android:summary="@string/setPinDes"
+            android:title="@string/setPin" />
 
         <com.jenzz.materialpreference.SwitchPreference
             android:icon="@drawable/ic_memory_grey_600_24dp"

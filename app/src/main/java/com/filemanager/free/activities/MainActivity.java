@@ -89,6 +89,7 @@ import com.filemanager.free.IMyAidlInterface;
 import com.filemanager.free.Loadlistener;
 import com.filemanager.free.R;
 import com.filemanager.free.adapters.DrawerAdapter;
+import com.filemanager.free.admob.AdWrapper;
 import com.filemanager.free.database.Tab;
 import com.filemanager.free.database.TabHandler;
 import com.filemanager.free.filesystem.BaseFile;
@@ -96,7 +97,7 @@ import com.filemanager.free.filesystem.FileUtil;
 import com.filemanager.free.filesystem.HFile;
 import com.filemanager.free.filesystem.RootHelper;
 import com.filemanager.free.fragments.AppsList;
-import com.filemanager.free.fragments.AsyncHelper;
+import com.filemanager.free.fragments.SearchAsyncHelper;
 import com.filemanager.free.fragments.Main;
 import com.filemanager.free.fragments.ProcessViewer;
 import com.filemanager.free.fragments.TabFragment;
@@ -159,7 +160,7 @@ public class MainActivity extends BaseActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, OnRequestPermissionsResultCallback,
         SmbConnectionListener, DataChangeListener, BookmarkCallback,
-        AsyncHelper.HelperCallbacks {
+        SearchAsyncHelper.HelperCallbacks {
 
     final Pattern DIR_SEPARATOR = Pattern.compile("/");
     /* Request code used to invoke sign in user interactions. */
@@ -230,7 +231,7 @@ public class MainActivity extends BaseActivity implements
     StringBuffer newPathBuilder, oldPathBuilder;
     AppBarLayout appBarLayout;
     // helper fragment for search task to hold activity instance even after config changes
-    public AsyncHelper mAsyncHelperFragment;
+
     public static final String TAG_ASYNC_HELPER = "async_helper";
     public Main mainFragment;
 
@@ -245,9 +246,9 @@ public class MainActivity extends BaseActivity implements
     //Snackbar
     public CoordinatorLayout mCoordinatorLayout;
     //admob
-    public AdView mAdView;
-    public InterstitialAd mInterstitialAd;
-
+    public View mAdView;
+    public static InterstitialAd mInterstitialAd;
+    private static Context context;
     /**
      * Called when the activity is first created.
      */
@@ -258,17 +259,14 @@ public class MainActivity extends BaseActivity implements
         DataUtils.registerOnDataChangedListener(this);
         setContentView(R.layout.main_toolbar);
         initialiseViews();
-
+        context = this;
         tabHandler = new TabHandler(this, null, null, 1);
         utils = new Futils();
 
         mainActivityHelper = new MainActivityHelper(this);
         initialiseFab();
 
-        if (mAsyncHelperFragment != null) {
-            FragmentManager fm = getSupportFragmentManager();
-            mAsyncHelperFragment = (AsyncHelper) fm.findFragmentByTag(TAG_ASYNC_HELPER);
-        }
+
 
         history = new HistoryManager(this, "Table2");
         history.initializeTable(DataUtils.HISTORY, 0);
@@ -419,8 +417,6 @@ public class MainActivity extends BaseActivity implements
         //search
         searchView();
         //admob
-        requestAdmob();
-
         mInterstitialAd = new InterstitialAd(this);
         // set the ad unit ID
         mInterstitialAd.setAdUnitId("ca-app-pub-2257698129050878/4313141545");
@@ -435,7 +431,9 @@ public class MainActivity extends BaseActivity implements
 
         // SearchView basic attributes  ------------------------------------------------------------
         mSearchView = (SearchView) findViewById(R.id.searchView);
-        mSearchView.setVersion(SearchCodes.VERSION_MENU_ITEM);
+        if (mSearchView != null) {
+            mSearchView.setVersion(SearchCodes.VERSION_MENU_ITEM);
+        }
         mSearchView.setStyle(SearchCodes.STYLE_MENU_ITEM_CLASSIC);
         int mTheme = SearchCodes.THEME_LIGHT;
         mSearchView.setTheme(mTheme);
@@ -872,7 +870,7 @@ public class MainActivity extends BaseActivity implements
                 if (ma.IS_LIST) s.setTitle(R.string.gridview);
                 else s.setTitle(R.string.listview);
                 updatePath(ma.CURRENT_PATH, ma.results, ma.openMode, ma.folder_count, ma.file_count);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
 
             initiatebbar();
@@ -977,7 +975,7 @@ public class MainActivity extends BaseActivity implements
             TabFragment tabFragment = getFragment();
             if (tabFragment != null)
                 ma = (Main) tabFragment.getTab();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         switch (item.getItemId()) {
             case R.id.home:
@@ -1041,6 +1039,7 @@ public class MainActivity extends BaseActivity implements
                 utils.showHiddenDialog(ma);
                 break;
             case R.id.view:
+                assert ma != null;
                 if (ma.IS_LIST) {
                     if (DataUtils.listfiles.contains(ma.CURRENT_PATH)) {
                         DataUtils.listfiles.remove(ma.CURRENT_PATH);
@@ -1152,9 +1151,6 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     protected void onPause() {
-        if (mAdView != null) {
-            mAdView.pause();
-        }
         super.onPause();
         unregisterReceiver(mainActivityHelper.mNotificationReceiver);
         unregisterReceiver(receiver2);
@@ -1164,10 +1160,7 @@ public class MainActivity extends BaseActivity implements
     @Override
     public void onResume() {
         super.onResume();
-        //admob
-        if (mAdView != null) {
-            mAdView.resume();
-        }
+        AdWrapper.viewAd(true, mainActivity);
         requestNewInterstitial();
         if (materialDialog != null && !materialDialog.isShowing()) {
             materialDialog.show();
@@ -1210,10 +1203,6 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     protected void onDestroy() {
-        //admob
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
         super.onDestroy();
         if (rootmode) {
             try {
@@ -1270,6 +1259,7 @@ public class MainActivity extends BaseActivity implements
         getFragment().mViewPager.setPagingEnabled(b);
     }
 
+    @SuppressLint("SdCardPath")
     public File getUsbDrive() {
         File parent;
         parent = new File("/storage");
@@ -1280,7 +1270,7 @@ public class MainActivity extends BaseActivity implements
                     return f;
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         parent = new File("/mnt/sdcard/usbStorage");
         if (parent.exists() && parent.canExecute())
@@ -1359,7 +1349,6 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-
         // check if user enabled g+ api from preferences
         if (mGoogleApiClient != null) {
 
@@ -1611,6 +1600,7 @@ public class MainActivity extends BaseActivity implements
             ArrayList<String> names = b.getStringArrayList("names");
             ArrayList<String> rnames = new ArrayList<String>();
 
+            assert names != null;
             for (int i = names.size() - 1; i >= 0; i--) {
                 rnames.add(names.get(i));
             }
@@ -1618,6 +1608,7 @@ public class MainActivity extends BaseActivity implements
             ArrayList<String> paths = b.getStringArrayList("paths");
             final ArrayList<String> rpaths = new ArrayList<String>();
 
+            assert paths != null;
             for (int i = paths.size() - 1; i >= 0; i--) {
                 rpaths.add(paths.get(i));
             }
@@ -1731,7 +1722,7 @@ public class MainActivity extends BaseActivity implements
             public void run() {
                 try {
                     Thread.sleep(100);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
                 handler.post(new Runnable() {
                     @Override
@@ -1757,18 +1748,19 @@ public class MainActivity extends BaseActivity implements
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_frame);
         appBarLayout = (AppBarLayout) findViewById(R.id.lin);
         if (!ImageLoader.getInstance().isInited()) {
-
             ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
         }
-        displayImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.amaze_header)
-                .showImageForEmptyUri(R.drawable.amaze_header)
-                .showImageOnFail(R.drawable.amaze_header)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .bitmapConfig(Bitmap.Config.RGB_565)
-                .build();
+        if (displayImageOptions != null) {
+            displayImageOptions = new DisplayImageOptions.Builder()
+                    .showImageOnLoading(R.drawable.amaze_header)
+                    .showImageForEmptyUri(R.drawable.amaze_header)
+                    .showImageOnFail(R.drawable.amaze_header)
+                    .cacheInMemory(true)
+                    .cacheOnDisk(true)
+                    .considerExifParams(true)
+                    .bitmapConfig(Bitmap.Config.RGB_565)
+                    .build();
+        }
 
         buttonBarFrame = (FrameLayout) findViewById(R.id.buttonbarframe);
         buttonBarFrame.setBackgroundColor(Color.parseColor(skin));
@@ -1801,7 +1793,10 @@ public class MainActivity extends BaseActivity implements
         indicator_layout = findViewById(R.id.indicator_layout);
         mDrawerLinear = (ScrimInsetsRelativeLayout) findViewById(R.id.left_drawer);
         if (theme1 == 1) mDrawerLinear.setBackgroundColor(Color.parseColor("#303030"));
-        else mDrawerLinear.setBackgroundColor(Color.WHITE);
+        else {
+            assert mDrawerLinear != null;
+            mDrawerLinear.setBackgroundColor(Color.WHITE);
+        }
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.setStatusBarBackgroundColor(Color.parseColor(skin));
         mDrawerList = (ListView) findViewById(R.id.menu_drawer);
@@ -1818,9 +1813,12 @@ public class MainActivity extends BaseActivity implements
         }
 
         View v = findViewById(R.id.fab_bg);
-        if (theme1 == 1)
+        if (theme1 == 1) {
+            assert v != null;
             v.setBackgroundColor(Color.parseColor("#a6ffffff"));
+        }
 
+        assert v != null;
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1836,18 +1834,24 @@ public class MainActivity extends BaseActivity implements
         scroll.setSmoothScrollingEnabled(true);
         scroll1.setSmoothScrollingEnabled(true);
         ImageView divider = (ImageView) findViewById(R.id.divider1);
-        if (theme1 == 0)
+        if (theme1 == 0) {
+            assert divider != null;
             divider.setImageResource(R.color.divider);
-        else
+        }
+        else {
+            assert divider != null;
             divider.setImageResource(R.color.divider_dark);
+        }
 
         setDrawerHeaderBackground();
         View settingsbutton = findViewById(R.id.settingsbutton);
         if (theme1 == 1) {
+            assert settingsbutton != null;
             settingsbutton.setBackgroundResource(R.drawable.safr_ripple_black);
             ((ImageView) settingsbutton.findViewById(R.id.settingicon)).setImageResource(R.drawable.ic_settings_white_48dp);
             ((TextView) settingsbutton.findViewById(R.id.settingtext)).setTextColor(ContextCompat.getColor(con, android.R.color.white));
         }
+        assert settingsbutton != null;
         settingsbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1865,10 +1869,12 @@ public class MainActivity extends BaseActivity implements
         });
         View appbutton = findViewById(R.id.appbutton);
         if (theme1 == 1) {
+            assert appbutton != null;
             appbutton.setBackgroundResource(R.drawable.safr_ripple_black);
             ((ImageView) appbutton.findViewById(R.id.appicon)).setImageResource(R.drawable.ic_doc_apk_white);
             ((TextView) appbutton.findViewById(R.id.apptext)).setTextColor(ContextCompat.getColor(con, android.R.color.white));
         }
+        assert appbutton != null;
         appbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1910,30 +1916,16 @@ public class MainActivity extends BaseActivity implements
 
         }
         //admob
-        mAdView = (AdView) findViewById(R.id.adView);
+        mAdView = (View) findViewById(R.id.ads);
     }
 
-    //thiết lập admob
-    public void requestAdmob() {
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-        mAdView.setAdListener(new AdListener() {
-            @Override
-            public void onAdFailedToLoad(int errorCode) {
-                super.onAdFailedToLoad(errorCode);
-                mAdView.setVisibility(View.GONE);
-            }
-        });
-        if (mAdView.isLoading()) {
-            mAdView.setVisibility(View.VISIBLE);
-        }
-    }
 
-    public void showInterstitial() {
+
+    public static void showInterstitial() {
         if (mInterstitialAd != null && mInterstitialAd.isLoaded()) {
             mInterstitialAd.show();
         } else {
-            Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Ad did not load", Toast.LENGTH_SHORT).show();
             requestNewInterstitial();
         }
     }
@@ -1957,6 +1949,7 @@ public class MainActivity extends BaseActivity implements
                 View v = findViewById(R.id.fab_bg);
                 if (b) {
                     if (Build.VERSION.SDK_INT >= 21) {
+                        assert v != null;
                         v.setVisibility(View.GONE);
                     } else {
                         utils.revealShow(v, true);
@@ -1968,6 +1961,7 @@ public class MainActivity extends BaseActivity implements
         });
         //menu thêm thư mục
         FloatingActionButton floatingActionButton1 = (FloatingActionButton) findViewById(R.id.menu_item);
+        assert floatingActionButton1 != null;
         floatingActionButton1.setColorNormal(folderskin);
         floatingActionButton1.setColorPressed(fabskinpressed);
         floatingActionButton1.setOnClickListener(new View.OnClickListener() {
@@ -2075,7 +2069,7 @@ public class MainActivity extends BaseActivity implements
         floatingActionButton.close(true);
     }
 
-    public void requestNewInterstitial() {
+    public static void requestNewInterstitial() {
         if (!mInterstitialAd.isLoading() && !mInterstitialAd.isLoaded()) {
             AdRequest adRequest = new AdRequest.Builder().build();
             mInterstitialAd.loadAd(adRequest);
@@ -2743,6 +2737,8 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onCancelled() {
-
+        mainFragment.createViews(mainFragment.LIST_ELEMENTS, false, mainFragment.CURRENT_PATH,
+                mainFragment.openMode, false, !mainFragment.IS_LIST);
+        mainFragment.mSwipeRefreshLayout.setRefreshing(false);
     }
 }

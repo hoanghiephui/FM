@@ -51,8 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CopyService extends Service {
-    HashMap<Integer, Boolean> hash = new HashMap<Integer, Boolean>();
-    public HashMap<Integer, DataPackage> hash1 = new HashMap<Integer, DataPackage>();
+    HashMap<Integer, Boolean> hash = new HashMap<>();
+    public HashMap<Integer, DataPackage> hash1 = new HashMap<>();
     boolean rootmode;
     NotificationManager mNotifyManager;
     NotificationCompat.Builder mBuilder;
@@ -72,7 +72,7 @@ public class CopyService extends Service {
     boolean foreground = true;
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId) throws NullPointerException{
         Bundle b = new Bundle();
         ArrayList<BaseFile> files = intent.getParcelableArrayListExtra("FILE_PATHS");
         String FILE2 = intent.getStringExtra("COPY_DIRECTORY");

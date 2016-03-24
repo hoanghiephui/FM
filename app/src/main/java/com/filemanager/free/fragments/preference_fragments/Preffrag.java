@@ -16,7 +16,6 @@ package com.filemanager.free.fragments.preference_fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,23 +27,18 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -67,6 +61,7 @@ public class Preffrag extends PreferenceFragment implements Preference.OnPrefere
     private Toast toast;
     com.filemanager.free.activities.Preferences preferences;
     private final static int STORAGE_PERMISSION_RC = 69;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -277,6 +272,7 @@ public class Preffrag extends PreferenceFragment implements Preference.OnPrefere
         }
 
 
+
         findPreference("skin").setOnPreferenceClickListener(this);
         findPreference("fab_skin").setOnPreferenceClickListener(this);
         findPreference("icon_skin").setOnPreferenceClickListener(this);
@@ -430,5 +426,8 @@ public class Preffrag extends PreferenceFragment implements Preference.OnPrefere
         sharedPref.edit().putString("zippath", input).commit();
         sharedPref.edit().putString("extractpath", input).commit();
     }
+
+
+
 
 }

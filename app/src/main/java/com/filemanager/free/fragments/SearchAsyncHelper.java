@@ -26,9 +26,9 @@ import java.util.ArrayList;
 /**
  * Created by Hoang Hiep on 29/02/2016.
  */
-public class AsyncHelper extends Fragment {
+public class SearchAsyncHelper extends Fragment {
     private HelperCallbacks mCallbacks;
-    private String mPath, mInput;
+    private String mInput;
     public SearchTask mSearchTask;
     private int mOpenMode;
     private boolean mRootMode;
@@ -41,11 +41,8 @@ public class AsyncHelper extends Fragment {
     // interface for activity to communicate with asynctask
     public interface HelperCallbacks {
         void onPreExecute();
-
         void onPostExecute();
-
         void onProgressUpdate(BaseFile val);
-
         void onCancelled();
     }
 
@@ -62,7 +59,7 @@ public class AsyncHelper extends Fragment {
         super.onCreate(savedInstanceState);
 
         setRetainInstance(true);
-        mPath = getArguments().getString(KEY_PATH);
+        String mPath = getArguments().getString(KEY_PATH);
         mInput = getArguments().getString(KEY_INPUT);
         mOpenMode = getArguments().getInt(KEY_OPEN_MODE);
         mRootMode = getArguments().getBoolean(KEY_ROOT_MODE);
@@ -79,18 +76,23 @@ public class AsyncHelper extends Fragment {
         mCallbacks = null;
     }
 
-    class SearchTask extends AsyncTask<String, BaseFile, Void> {
+    @Override
+    public void onPause() {
+        super.onPause();
+        mSearchTask.cancel(true);
+    }
+
+    public class SearchTask extends AsyncTask<String, BaseFile, Void> {
 
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
 
             /*
             * Note that we need to check if the callbacks are null in each
             * method in case they are invoked after the Activity's and
             * Fragment's onDestroy() method have been called.
              */
-            if (mCallbacks != null) {
+            if (mCallbacks!=null) {
 
                 mCallbacks.onPreExecute();
             }
@@ -102,23 +104,28 @@ public class AsyncHelper extends Fragment {
         protected Void doInBackground(String... params) {
 
             String path = params[0];
-            HFile file = new HFile(mOpenMode, path);
+            HFile file=new HFile(mOpenMode, path);
             file.generateMode(getActivity());
-            if (file.isSmb()) return null;
+            if(file.isSmb())return null;
             search(file, mInput);
             return null;
         }
 
         @Override
-        public void onPostExecute(Void c) {
-            if (mCallbacks != null) {
+        public void onPostExecute(Void c){
+            if (mCallbacks!=null) {
                 mCallbacks.onPostExecute();
             }
         }
 
         @Override
+        protected void onCancelled() {
+            if (mCallbacks!=null) mCallbacks.onCancelled();
+        }
+
+        @Override
         public void onProgressUpdate(BaseFile... val) {
-            if (!isCancelled() && mCallbacks != null) {
+            if (!isCancelled() && mCallbacks!=null) {
                 mCallbacks.onProgressUpdate(val[0]);
             }
         }
@@ -144,8 +151,9 @@ public class AsyncHelper extends Fragment {
                                     publishProgress(x);
                                 }
                             }
-                        }
+                        } else return;
                     }
+                else return;
             } else {
                 System.out
                         .println(file.getPath() + "Permission Denied");
