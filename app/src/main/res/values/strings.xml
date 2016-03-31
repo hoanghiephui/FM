@@ -417,5 +417,6 @@
     <string name="activity_dialog_decline" tools:ignore="ButtonCase">CANCEL</string>
     <string name="activity_dialog_content">Tap \'OK\' to log out, when you log back in you\'ll be able to create a new Pincode.\n\nIf you remember your Pincode, tap \'Cancel\' to go back.</string>
     <string name="invalid_name">Invalid name, please try again</string>
+    <string name="useIpCustom">Use custom IP</string>
 </resources>
 

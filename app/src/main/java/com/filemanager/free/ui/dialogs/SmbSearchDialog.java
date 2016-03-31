@@ -12,6 +12,7 @@
 
 package com.filemanager.free.ui.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -21,6 +22,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +44,6 @@ import com.filemanager.free.utils.SubnetScanner;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by arpitkh996 on 16-01-2016.
- */
 public class SmbSearchDialog extends DialogFragment {
     Listviewadapter listviewadapter;
     ArrayList<Computer> computers = new ArrayList<>();
@@ -51,7 +51,6 @@ public class SmbSearchDialog extends DialogFragment {
     int theme, fabskin;
     SubnetScanner subnetScanner;
     Context context;
-
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -94,7 +93,7 @@ public class SmbSearchDialog extends DialogFragment {
                 }
             }
         });
-        builder.positiveText("Use custom IP");
+        builder.positiveText(getResources().getString(R.string.useIpCustom));
         builder.positiveColor(fabskin);
         computers.add(new Computer("-1", "-1"));
         listviewadapter = new Listviewadapter(getActivity(), R.layout.smb_computers_row, computers);
@@ -121,7 +120,7 @@ public class SmbSearchDialog extends DialogFragment {
                         public void run() {
                             if (computers.size() == 1) {
                                 dismiss();
-                                Toast.makeText(getActivity(), R.string.nodevicefound, Toast.LENGTH_SHORT).show();
+                                Snackbar.make(MainActivity.mCoordinatorLayout, R.string.nodevicefound, Snackbar.LENGTH_LONG).show();
                                 MainActivity mainActivity = (MainActivity) getActivity();
                                 mainActivity.showSMBDialog("", "", false);
                                 return;
@@ -162,6 +161,7 @@ public class SmbSearchDialog extends DialogFragment {
         }
 
 
+        @SuppressLint({"ViewHolder", "InflateParams"})
         public View getView(int position, View convertView, ViewGroup parent) {
             Computer f = getItem(position);
             if (f.addr.equals("-1")) {

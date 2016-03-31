@@ -244,7 +244,7 @@ public class MainActivity extends BaseActivity implements
     private List<SearchItem> mSuggestionsList;
 
     //Snackbar
-    public CoordinatorLayout mCoordinatorLayout;
+    public static CoordinatorLayout mCoordinatorLayout;
     //admob
     public View mAdView;
     public static InterstitialAd mInterstitialAd;
@@ -1159,7 +1159,6 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onResume() {
-        super.onResume();
         AdWrapper.viewAd(true, mainActivity);
         requestNewInterstitial();
         if (materialDialog != null && !materialDialog.isShowing()) {
@@ -1182,6 +1181,7 @@ public class MainActivity extends BaseActivity implements
             floatingActionButton.setVisibility(View.INVISIBLE);
             floatingActionButton.hideMenuButton(false);
         }
+        super.onResume();
     }
 
     @Override
@@ -1933,7 +1933,7 @@ public class MainActivity extends BaseActivity implements
     //khởi tạo các nut floating
     Boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 
-    void initialiseFab() {
+    private void initialiseFab() {
         String folder_skin = PreferenceUtils.getFolderColorString(Sp);
         int fabSkinPressed = PreferenceUtils.getStatusColor(fabskin);
         int folderskin = Color.parseColor(folder_skin);
@@ -2021,38 +2021,6 @@ public class MainActivity extends BaseActivity implements
     //thiết lập hiển thị quảng cảo và các chức năng của menu
     public void setResult(final int num, final boolean check) {
         showInterstitial();
-        mInterstitialAd.setAdListener(new AdListener() {
-            @Override
-            public void onAdClosed() {
-                super.onAdClosed();
-                Log.d("Interstitial", "close");
-                if (check) {
-                    if (isSDPresent) {
-                        mainActivityHelper.add(num);
-                    } else {
-                        Snackbar.make(mCoordinatorLayout, getString(R.string.nullSD), Snackbar.LENGTH_LONG).show();
-                    }
-                } else {
-                    mainActivityHelper.add(num);
-                }
-                requestNewInterstitial();
-            }
-
-            @Override
-            public void onAdFailedToLoad(int errorCode) {
-                super.onAdFailedToLoad(errorCode);
-                Log.d("Interstitial", "fail");
-                if (check) {
-                    if (isSDPresent) {
-                        mainActivityHelper.add(num);
-                    } else {
-                        Snackbar.make(mCoordinatorLayout, getString(R.string.nullSD), Snackbar.LENGTH_LONG).show();
-                    }
-                } else {
-                    mainActivityHelper.add(num);
-                }
-            }
-        });
         if (mInterstitialAd != null && !mInterstitialAd.isLoaded()) {
             if (check) {
                 if (isSDPresent) {
@@ -2064,7 +2032,43 @@ public class MainActivity extends BaseActivity implements
                 mainActivityHelper.add(num);
             }
             requestNewInterstitial();
+        } else {
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    super.onAdClosed();
+                    Log.d("Interstitial", "close");
+                    if (check) {
+                        if (isSDPresent) {
+                            mainActivityHelper.add(num);
+                        } else {
+                            Snackbar.make(mCoordinatorLayout, getString(R.string.nullSD), Snackbar.LENGTH_LONG).show();
+                        }
+                    } else {
+                        mainActivityHelper.add(num);
+                    }
+                    requestNewInterstitial();
+                }
+
+                @Override
+                public void onAdFailedToLoad(int errorCode) {
+                    super.onAdFailedToLoad(errorCode);
+                    Log.d("Interstitial", "fail");
+                    if (check) {
+                        if (isSDPresent) {
+                            mainActivityHelper.add(num);
+                        } else {
+                            Snackbar.make(mCoordinatorLayout, getString(R.string.nullSD), Snackbar.LENGTH_LONG).show();
+                        }
+                    } else {
+                        mainActivityHelper.add(num);
+                    }
+                }
+            });
+
         }
+
+
         utils.revealShow(findViewById(R.id.fab_bg), false);
         floatingActionButton.close(true);
     }
@@ -2661,7 +2665,7 @@ public class MainActivity extends BaseActivity implements
                 mainActivity.grid.addPath(s[0], s[1], DataUtils.SMB, 1);
             }
         } catch (Exception e) {
-            Toast.makeText(mainActivity, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            Snackbar.make(mCoordinatorLayout, e.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }

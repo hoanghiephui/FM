@@ -47,7 +47,6 @@ public class SubnetScanner extends Thread {
 
     public interface ScanObserver {
         void computerFound(Computer computer);
-
         void searchFinished();
     }
 
@@ -122,6 +121,7 @@ public class SubnetScanner extends Thread {
                                     onFound(computer);
                                 } else {
                                     //SELog.d("No SMB host found at ", computer.addr);
+                                    return;
                                 }
                                 ipAddress = size;
                             } catch (InterruptedException e) {
@@ -142,7 +142,7 @@ public class SubnetScanner extends Thread {
                 }
                 try {
                     this.bdThread.join();
-                } catch (InterruptedException e4) {
+                } catch (InterruptedException ignored) {
                 }
             } else {
                 return;
@@ -166,18 +166,18 @@ public class SubnetScanner extends Thread {
                         SmbFile[] listFiles = smbFile.listFiles();
                         for (SmbFile smbFile2 : listFiles) {
                             SmbFile[] listFiles2 = smbFile2.listFiles();
-                            for (int i2 = 0; i2 < listFiles2.length; i2++) {
+                            for (SmbFile aListFiles2 : listFiles2) {
                                 try {
-                                    String substring = listFiles2[i2].getName().substring(0, listFiles2[i2].getName().length() - 1);
+                                    String substring = aListFiles2.getName().substring(0, aListFiles2.getName().length() - 1);
                                     UniAddress byName = UniAddress.getByName(substring);
                                     if (byName != null) {
                                         SubnetScanner.this.onFound(new Computer(substring, byName.getHostAddress()));
                                     }
-                                } catch (Throwable e) {
+                                } catch (Throwable ignored) {
                                 }
                             }
                         }
-                    } catch (Throwable e2) {
+                    } catch (Throwable ignored) {
 
                     }
                 }
@@ -205,7 +205,7 @@ public class SubnetScanner extends Thread {
         super.interrupt();
         try {
             this.pool.shutdownNow();
-        } catch (Throwable th) {
+        } catch (Throwable ignored) {
 
         }
     }
